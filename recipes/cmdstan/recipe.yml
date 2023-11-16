@@ -1,0 +1,54 @@
+context:
+  name: cmdstan
+  version: 2.33.1
+package:
+  name: '{{ name }}'
+  version: '{{ version }}'
+source:
+  url: https://github.com/stan-dev/{{ name }}/releases/download/v{{ version }}/{{ name }}-{{ version }}-linux-ppc64el.tar.gz
+  sha256: 1f9136e857301924d83a5c211feec0efd0d8a30fee561c82845ca133ba4aff4d
+build:
+  number: 0
+requirements:
+  build:
+  - emscripten_emscripten-wasm32
+  - cross-python_emscripten-wasm32
+  - '{{ compiler(''cxx'') }}'
+  - make
+  - '{{ compiler(''m2w64_cxx'') }}'
+  - m2w64-make
+  - m2-filesystem
+  - m2-sed
+  - m2-coreutils
+  host:
+  - tbb-devel
+  run:
+  - '{{ compiler(''cxx'') }}'
+  - make
+  - tbb-devel
+  - '{{ compiler(''m2w64_cxx'') }}'
+  - m2w64-make
+  - m2-filesystem
+  - m2-sed
+  - m2-coreutils
+about:
+  home: https://mc-stan.org/users/interfaces/cmdstan.html
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE
+  summary: CmdStan, the command line interface to Stan
+  description: |
+    <b>CmdStan</b> is the command line interface to Stan, a package providing
+
+    * full Bayesian inference using the No-U-Turn sampler (NUTS), a variant of Hamiltonian Monte Carlo (HMC),
+    * penalized maximum likelihood estimation (MLE) using optimization, either Newton or quasi-Newton algorithms BFGS and L-BFGS,
+    * approximate Bayesian inference using automatic differentiation variational inference (ADVI),
+    * a full first- and higher-order automatic differentiation library based on C++ template overloads, and
+    * a supporting fully-templated matrix, linear algebra, and probability special function library.
+  doc_url: https://mc-stan.org/docs/cmdstan-guide/index.html
+  dev_url: https://github.com/stan-dev/cmdstan
+extra:
+  based-on: https://raw.githubusercontent.com/conda-forge/cmdstan-feedstock/main/recipe/meta.yaml
+  recipe-maintainers:
+  - snek-bot
+  - bamarco

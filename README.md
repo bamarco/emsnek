@@ -13,9 +13,16 @@ Web assembly (wasm) is a good cross platform target for a [universal binary](htt
 
 ## Usage
 
+### Install babashka
+You can [install babashka](https://github.com/babashka/babashka#installation).
+
+If you are using nix then:
+``` sh
+nix-shell -p babashka
+```
+
+### Boify a package
 ``` sh
 bin/boify <<conda-package-name>>
 ```
 
-### Dependencies
-- [babashka](https://github.com/babashka/babashka#installation).
