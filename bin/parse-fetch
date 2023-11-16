@@ -84,8 +84,8 @@
                :sha256 (-> tree :source :sha256)}
       :build {:number 0}
       :requirements {:build (into [emwasm empyth] (-> tree :requirements :build hack-branch))
-                     :host (-> tree :requirements :host hack-branch)
-                     :run (-> tree :requirements :run hack-branch)}
+                     :host (-> tree :requirements :host hack-branch vec)
+                     :run (-> tree :requirements :run hack-branch vec)}
              ;;:test {}
              ;;:outputs []
       :about (-> tree :about)
