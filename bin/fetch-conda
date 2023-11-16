@@ -1,0 +1,43 @@
+#!/usr/bin/env bb
+(require '[babashka.cli :as cli])
+
+(defn ppr-str [obj]
+  (with-out-str (pprint obj)))
+
+(defn url [pkg]
+  (str "https://raw.githubusercontent.com/conda-forge/" pkg "-feedstock/main/recipe/meta.yaml"))
+
+(defn lines! [txt]
+  (doseq [line (str/split txt #"\n")]
+    (prn line)))
+
+(defn chars [txt]
+  (doseq [c txt]
+    (pr c)))
+
+(def cli-options
+  {:alias {:o :out}
+   :coerce {:out :string}})
+
+(defn fetch-raw [pkg]
+  (-> pkg url slurp))
+
+(defn main! [{:keys [args opts]}]
+  (let [pkg (-> args first)
+        raw (if pkg (fetch-raw pkg) (edn/read))
+        out-file (:out opts)
+        out! (if out-file
+               #(->> % ppr-str (spit out-file))
+               pprint)]
+  (->
+   {:args args
+    :opts opts
+    :url (url pkg)
+    :raw raw
+    :package pkg}
+   out!)))
+
+(->
+ *command-line-args*
+ (cli/parse-args cli-options)
+ main!)

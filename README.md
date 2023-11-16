@@ -11,7 +11,11 @@ Web assembly (wasm) is a good cross platform target for a [universal binary](htt
 ### Emscripten Forge
 [Emscripten-forge](https://github.com/emscripten-forge/recipes) has been used successfully by [Jupyter Lite](https://blog.jupyter.org/mamba-meets-jupyterlite-88ef49ac4dc8) to build various projects such as scipy, numpy, and plotly directly in the browser for code notebooks. This is the exact sort of usage needed for science-based progressive web applications. Emscripten-forge needs many more recipe's to achieve comprehensive coverage of science based libraries.
 
-## Development
+## Usage
+
+``` sh
+bin/boify <<conda-package-name>>
+```
 
 ### Dependencies
 - [babashka](https://github.com/babashka/babashka#installation).

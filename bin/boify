@@ -1,0 +1,8 @@
+#!/bin/sh
+package="$1"
+mkdir -p fetches
+bin/fetch-conda "$package" -o "fetches/$package.edn"
+mkdir -p "recipes/$package"
+cp recipe-template/* "recipes/$package/"
+bin/parse-fetch "fetches/$package.edn" --edn -o "recipes/$package/recipe.edn"
+bin/parse-fetch "fetches/$package.edn" -o "recipes/$package/recipe.yml"

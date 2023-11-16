@@ -1,0 +1,99 @@
+#!/usr/bin/env bb
+(require '[babashka.cli :as cli])
+(require '[clojure.string :as str])
+(require '[clj-yaml.core :as yml])
+
+(def bot-name "snek-bot")
+
+(def author "bamarco")
+
+(defn conda->boa [txt]
+  (->
+   txt
+   yaml/parse-string))
+
+(def cli-options
+  {:alias {:o :out}
+   :coerce {:out :string
+            :edn :boolean}})
+
+(defn context [{:keys [raw]}]
+  (let [vars (re-seq #"\{% set (.*) = \"(.*)\" %\}" raw)]
+    (zipmap
+     (map #(-> % second keyword) vars)
+     (map #(nth % 2) vars))))
+
+(defn package [{:keys [raw]}]
+  (let [vars (re-seq #"")]))
+
+(defn drop-template [raw]
+  (str/replace raw #"\{%.*%\}" ""))
+
+(defn to-yaml [obj]
+  (yml/generate-string obj :dumper-options {:flow-style :block}))
+
+(defn parse-jyaml
+  "Roughly parses conda-flavored jinja templated yaml, for extracting values"
+  [raw]
+  (-> raw drop-template yml/parse-string))
+
+(defn template-var? [node]
+  (and
+   node
+   (= (-> node keys count) 1)
+   (-> node keys first map?)
+   (= (-> node keys first keys count) 1)
+   (-> node keys first keys first keyword?)))
+
+(defn hack-leaf [node]
+  (if (template-var? node)
+    (str "{{ " (-> node keys first keys first name) " }}")
+    node))
+
+(defn hack-branch [branch]
+  (map hack-leaf branch))
+
+(def emwasm "emscripten_emscripten-wasm32")
+
+(def empyth "cross-python_emscripten-wasm32")
+
+(defn ppr-str [obj]
+  (with-out-str (pprint obj)))
+
+(defn conform [obj {:as opts :keys [edn]}]
+  (if edn
+    (ppr-str obj)
+    (to-yaml obj)))
+
+(defn out! [obj {:as opts :keys [out]}]
+  (if out
+    (spit out obj)
+    (pr obj))
+  (flush))
+
+(defn main! [{:keys [args opts]}]
+  (let [in (or (-> args first slurp edn/read-string) (edn/read))
+        vars (context in)
+        tree (-> in :raw parse-jyaml)]
+    (->
+     {:context {:name (or (:name vars) (-> tree :package :name))
+                :version (or (:version vars) (-> tree :package :version))}
+      :package {:name "{{ name }}"
+                :version "{{ version }}"}
+      :source {:url (-> tree :source :url)
+               :sha256 (-> tree :source :sha256)}
+      :build {:number 0}
+      :requirements {:build (into [emwasm empyth] (-> tree :requirements :build hack-branch))
+                     :host (-> tree :requirements :host hack-branch)
+                     :run (-> tree :requirements :run hack-branch)}
+             ;;:test {}
+             ;;:outputs []
+      :about (-> tree :about)
+      :extra {:based-on (-> in :url)
+              :recipe-maintainers [bot-name author]}}
+     (conform opts)
+     (out! opts))))
+(->
+ *command-line-args*
+ (cli/parse-args cli-options)
+ main!)
